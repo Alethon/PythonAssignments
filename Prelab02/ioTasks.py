@@ -8,3 +8,9 @@
 import os
 import sys
 
+# Module  level  Variables. (Write  this  statement  verbatim .)
+#######################################################
+DataPath = os.path.expanduser('~ee364/DataFolder/Prelab02')
+
+def fileList():
+    return
