@@ -38,6 +38,18 @@ def getGainPercent(symbol):
             gain += 1
     return 100 * gain / len(data)
 
+def getVolumeSum(symbol, date1, date2):
+    date01 = [int(num.strip()) for num in date1.split('/')]
+    date02 = [int(num.strip()) for num in date2.split('/')]
+    if date01[0] > date02[0]:
+        return None
+    if date01[0] == date02[0] and date01[1] > date02[1]:
+        return None
+    if date01[0] == date02[0] and date01[1] == date02[1] and date01[2] >= date02[2]:
+        return None
+    return
+
+
 if __name__ == "__main__":
     #print(fileList())
-    print(getGainPercent("AAPL"))
+    print(getVolumeSum("AAPL", "2015/08/24", "2015/08/25"))
