@@ -15,9 +15,9 @@ DataPath = path.expanduser('~ee364/DataFolder/Prelab03')
 
 #circuits and maps
 def listDir():
-    return [f for f in os.listdir(DataPath) if os.path.isfile(os.path.join(DataPath, f))]
+    return [f for f in os.listdir(path.join(DataPath, 'maps'))]
 
-def circuitDict():
+def circuitProjDict():
     cdict = {}
     with open(path.join(DataPath, 'maps/projects.dat'), "r") as file:
         projects = [f.strip().split() for f in file.readlines()[2:]]
@@ -28,7 +28,7 @@ def circuitDict():
             cdict[p[1]] = [p[0]]
     return cdict
 
-def projectDict():
+def projectCircDict():
     pdict = {}
     with open(path.join(DataPath, 'maps/projects.dat'), "r") as file:
         projects = [f.strip().split() for f in file.readlines()[2:]]
@@ -39,32 +39,40 @@ def projectDict():
             pdict[p[0]] = [p[1]]
     return pdict
 
-def componentClass():
+def componentIndex():
+    comps = {}
     datafiles = ['resistors.dat', 'inductors.dat', 'capacitors.dat', 'transistors.dat']
-    comps = dict()
     for filename in datafiles:
         with open(path.join(DataPath, 'maps/' + filename), 'r') as file:
-
+            data = [[f.strip().split()[0], float(f.strip().split()[1].strip('$'))] for f in file.readlines()[3:]]
+        comps[str(filename.upper()[0])] = {}
+        for d in data:
+            comps[str(filename.upper()[0])][d[0]] = d[1]
+    return comps
 
 def componentList(circuit):
     with open(path.join(DataPath, 'circuits/circuit_' + circuit + '.dat')) as file:
         data = [f.strip() for f in file.readlines()]
     return data[data.index('Components:') + 2:]
 
-
 def getComponentCountByProject(projectID, componentSymbol):
-    cdict = circuitDict(); comps = set()
-    if not projectID in cdict:
+    circDict = circuitProjDict(); comps = set()
+    if not projectID in circDict:
         raise ValueError('ProjectID ' + projectID + ' not in use.')
-    for c in cdict[projectID]:
-        None
-    componentList(cdict[projectID][0])
-    return
+    compDict = componentIndex()[componentSymbol]
+    for circuit in circDict[projectID]:
+        comps.update(set(componentList(circuit)).intersection(set(compDict)))
+    return len(comps)
 
-
+def getComponentCountByStudent(studentName, componentSymbol):
+    with open(path.join(DataPath, 'maps/students.dat'), 'r') as file:
+        data = [[wd.strip() for wd in f.split('|')] for f in file.readlines()[2:]]
+    return data
 
 
 
 
 if __name__ == "__main__":
-    print(getComponentCountByProject('082D6241-40EE-432E-A635-65EA8AA374B6', ""))
+    #print(getComponentCountByProject('082D6241-40EE-432E-A635-65EA8AA374B6', "C"))
+    #print(getComponentCountByStudent("", "")[5:20])
+    print(listDir())
