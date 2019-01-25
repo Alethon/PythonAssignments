@@ -77,10 +77,10 @@ def componentList(circuitID):
 #dictionary that looks up participating students in a circuitID
 def getStudentsByCircuit():
     studentDict = {}
-    for filename in listdir(path.join(DataPath, 'circuits')):
+    for filename in os.listdir(path.join(DataPath, 'circuits')):
         with open(path.join(DataPath, 'circuits/' + filename), 'r') as file:
             data = [f.strip() for f in file.readlines()[2:]]
-        data = data[0:data.index('Circuits:') - 1]
+        data = data[0:data.index('Components:') - 1]
         studentDict[filename.split('_')[1].split('.')[0]] = data
     return studentDict
 
@@ -140,7 +140,7 @@ def getParticipationByStudent(studentName):
 #problem 4
 def getParticipationByProject(projectID):
     studentIDs = set()
-    pdict = projectCircDict()
+    pdict = circuitProjDict()
     if projectID not in pdict.keys():
         raise ValueError(projectID + ' is not an active project.')
     circuits = pdict[projectID]
@@ -150,10 +150,75 @@ def getParticipationByProject(projectID):
     studentNameDict = studentNameIndex()
     return set([studentNameDict[student] for student in studentIDs])
 
+#problem 5
+def getCostOfProjects():
+    pdict = circuitProjDict()
+    compDex = componentIndex()
+    prices = {}
+    for k in compDex.keys():
+        prices.update(compDex[k])
+    for k in pdict.keys():
+        pdict[k] = round(sum([round(sum([float(prices[component]) for component in componentList(circuit)]), 2) for circuit in pdict[k]]), 2)
+    return pdict
+
+#problem 6
+def getProjectByComponent(componentIDs):
+    circs = projectCircDict()
+    return set([p for c in circs.keys() for p in circs[c] if len(set(componentIDs).intersection(set(componentList(c)))) != 0])
+
+#problem 7
+def getCommonByProject(projectID1, projectID2):
+    p1C = set(); p2C = set()
+    circDict = circuitProjDict();
+    if not projectID1 in circDict:
+        raise ValueError('ProjectID ' + projectID1 + ' not in use.')
+    if not projectID2 in circDict:
+        raise ValueError('ProjectID ' + projectID2 + ' not in use.')
+    for circuit in circDict[projectID1]:
+        p1C.update(set(componentList(circuit)))
+    for circuit in circDict[projectID2]:
+        p2C.update(set(componentList(circuit)))
+    return sorted(list(p1C.intersection(p2C)))
+
+#problem 8
+def getComponentReport(componentIDs):
+    report = {}
+    pdict = circuitProjDict()
+    for comp in componentIDs:
+        report[comp] = 0
+    for k in pdict.keys():
+        for circuit in pdict[k]:
+            for comp in componentList(circuit):
+                if comp in report.keys():
+                    report[comp] += 1
+    return report
+
+#problem 9
+def getCircuitByStudent(studentNames):
+    circDict = getCircuitsByStudent()
+    studentID = studentIDIndex()
+    circuits = set()
+    for student in studentNames:
+        circuits.update(set(circDict[studentID[student]]))
+    return circuits
+
+#problem 10
+def getCircuitsByComponent(componentIDs):
+    circuitIDs = set()
+    for filename in os.listdir(path.join(DataPath, 'circuits')):
+        with open(path.join(DataPath, 'circuits/' + filename)) as file:
+            data = [f.strip() for f in file.readlines()]
+        data = data[data.index('Components:') + 2:]
+        if len(set(data).intersection(componentIDs)) > 0:
+            print(filename.split('_')[1].split('.')[0])
+            circuitIDs.update(set([filename.split('.')[0].split('_')[1]]))
+    return circuitIDs
+
 
 if __name__ == "__main__":
-    '''with open(path.join(DataPath, 'maps/students.dat'), 'r') as file:
-        enrolled = [[wd.strip() for wd in f.split('|')] for f in file.readlines()[2:]]
-    for student in enrolled[0:5]:
-        print(student[0])
-        print(len(getParticipationByStudent(student[0])))'''
+    #with open(path.join(DataPath, 'maps/students.dat'), 'r') as file:
+    #    enrolled = [[wd.strip() for wd in f.split('|')] for f in file.readlines()[2:]]
+    #print([e[0] for e in enrolled[0:5]])
+    #print(getCommonByProject('075A54E6-530B-4533-A2E4-A15226BE588C', '4C5B295B-58E1-4CFB-80DF-88938B9A6300'))
+    #print(getComponentReport(set(['WTU-670', 'WTX-053', 'XOT-130'])))
+    print(getCircuitsByComponent(set(['RLV-754', 'RMY-042', 'RPF-751'])))#, 'Alexander, Carlos', 'Allen, Amanda', 'Anderson, Debra', 'Bailey, Catherine']))
