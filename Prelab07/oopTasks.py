@@ -5,8 +5,6 @@
 #    Date:        2/24/19
 #######################################################
 
-import os
-import sys
 from enum import Enum
 
 class Level(Enum):
